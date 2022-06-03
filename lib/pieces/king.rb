@@ -11,4 +11,21 @@ class King
     @position = [file, rank]
     @in_check = false
   end
+
+  # Returns every valid or invalid move as an array from this piece's position.
+  def movement
+    all_moves = []
+
+    all_moves.append( [(file.ord + 1).chr, rank] )
+    all_moves.append( [(file.ord - 1).chr, rank] )
+    all_moves.append( [(file.ord).chr, rank + 1] )
+    all_moves.append( [(file.ord).chr, rank - 1] )
+
+    all_moves.append( [(file.ord + 1).chr, rank + 1] )
+    all_moves.append( [(file.ord - 1).chr, rank - 1] )
+    all_moves.append( [(file.ord + 1).chr, rank - 1] )
+    all_moves.append( [(file.ord - 1).chr, rank + 1] )
+
+    all_moves
+  end
 end
