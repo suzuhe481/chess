@@ -10,4 +10,14 @@ class Pawn
     @position = [file, rank]
     @first_move = true
   end
+
+  # Returns every valid or invalid move as an array from this piece's position.
+  def movement
+    all_moves = []
+
+    all_moves.append( [(file.ord).chr, rank + 1] )
+    all_moves.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+
+    all_moves
+  end
 end
