@@ -9,4 +9,19 @@ class Bishop
     @rank = rank
     @position = [file, rank]
   end
+
+  # Returns every valid or invalid move as an array from this piece's position.
+  def movement
+    all_moves = []
+    max_range = (1..7)
+
+    max_range.each do |spaces|
+      all_moves.append( [(file.ord + spaces).chr, rank + spaces] )
+      all_moves.append( [(file.ord - spaces).chr, rank - spaces] )
+      all_moves.append( [(file.ord + spaces).chr, rank - spaces] )
+      all_moves.append( [(file.ord - spaces).chr, rank + spaces] )
+    end
+
+    all_moves
+  end
 end
