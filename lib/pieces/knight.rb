@@ -11,4 +11,20 @@ class Knight
     @rank = rank
     @position = [file, rank]
   end
+
+  # Returns every valid or invalid move as an array from this piece's position.
+  def movement
+    all_moves = []
+
+    all_moves.append( [(file.ord + 1).chr, rank + 2] )
+    all_moves.append( [(file.ord + 1).chr, rank - 2] )
+    all_moves.append( [(file.ord - 1).chr, rank - 2] )
+    all_moves.append( [(file.ord - 1).chr, rank + 2] )
+    all_moves.append( [(file.ord + 2).chr, rank + 1] )
+    all_moves.append( [(file.ord + 2).chr, rank - 1] )
+    all_moves.append( [(file.ord - 2).chr, rank - 1] )
+    all_moves.append( [(file.ord - 2).chr, rank + 1] )
+
+    all_moves
+  end
 end
