@@ -94,4 +94,15 @@ class Board
 
     return nil
   end
+
+  # Switches the current and opponent player.
+  def switch_player
+    temp_player = @curr_player
+    @curr_player = @opponent_player
+    @opponent_player = temp_player
+
+    temp_team = @curr_team
+    @curr_team = @opponent_team
+    @opponent_team = temp_team
+  end
 end
