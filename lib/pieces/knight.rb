@@ -4,12 +4,14 @@
 #                  This piece is allowed to jump over other pieces.
 # Capture: Can capture a opponent's piece if it lands on it.
 class Knight
-  attr_accessor :rank, :file, :position
+  attr_accessor :rank, :file, :position, :owner, :token
 
-  def initialize(file, rank)
+  def initialize(file, rank, owner, token)
     @file = file
     @rank = rank
     @position = [file, rank]
+    @owner = owner
+    @token = token
   end
 
   # Returns every valid or invalid move as an array from this piece's position.
