@@ -1,18 +1,27 @@
 # Board object.
 # Containing all of the pieces of the game.
 class Board
-  attr_accessor :pawn, :knight, :bishop, :rook, :queen, :king, :curr_player, :opponent_player, :curr_team, :opponent_team
+  attr_accessor :curr_player, :opponent_player, :curr_team, :opponent_team
 
   def initialize
     @curr_player = "Player 1"
     @opponent_player = "Player 2"
 
-    @knight = Knight.new("b", 1)
-    @pawn = Pawn.new("a", 2)
-    @bishop = Bishop.new("c", 1)
-    @rook = Rook.new("a", 1)
-    @queen = Queen.new("d", 1)
-    @king = King.new("e", 1)
+    @curr_team = []
+    @curr_team.append(Knight.new("b", 1, "Player 1", "W_Kn"))
+    @curr_team.append(Pawn.new("a", 2, "Player 1", "W_Pa"))
+    @curr_team.append(Bishop.new("c", 1, "Player 1", "W_Bi"))
+    @curr_team.append(Rook.new("a", 1, "Player 1", "W_Ro"))
+    @curr_team.append(Queen.new("d", 1, "Player 1", "W_Qu"))
+    @curr_team.append(King.new("e", 1, "Player 1", "W_Ki"))
+    
+    @opponent_team = []
+    @opponent_team.append(Knight.new("b", 1, "Player 1", "W_Kn"))
+    @opponent_team.append(Pawn.new("a", 2, "Player 1", "W_Pa"))
+    @opponent_team.append(Bishop.new("c", 1, "Player 1", "W_Bi"))
+    @opponent_team.append(Rook.new("a", 1, "Player 1", "W_Ro"))
+    @opponent_team.append(Queen.new("d", 1, "Player 1", "W_Qu"))
+    @opponent_team.append(King.new("e", 1, "Player 1", "W_Ki"))
   end
 
   # Returns an array of valid moves from a given piece's current position.
