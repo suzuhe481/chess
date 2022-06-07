@@ -1,10 +1,8 @@
 # Board object.
 # Containing all of the pieces of the game.
 class Board
-  attr_accessor :pawn, :knight
   attr_accessor :pawn, :knight, :bishop, :rook, :queen, :king, :curr_player, :opponent_player, :curr_team, :opponent_team
 
-  def initialize; end
   def initialize
     @curr_player = "Player 1"
     @opponent_player = "Player 2"
