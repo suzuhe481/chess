@@ -55,7 +55,7 @@ class Board
     @opponent_team.append(King.new("e", 8, "Player 2", "B_Ki"))
   end
 
-  # Returns an array of valid moves from a given piece's current position.
+  # Returns a sorted array of valid moves from a given piece's current position.
   def find_moves(chosen_piece)
     valid_moves = []
 
@@ -63,7 +63,7 @@ class Board
       valid_moves.append(move) if check_valid_move?(move) && empty_space?(move)
     end
 
-    valid_moves
+    valid_moves.sort
   end
 
   # Returns true if a given position is a valid move.
