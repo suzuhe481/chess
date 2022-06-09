@@ -51,4 +51,11 @@ class Queen
 
     all_moves
   end
+
+  # Changes this pieces current position.
+  def move_to(file, rank)
+    @file = file
+    @rank = rank
+    @position = [file, rank]
+  end
 end
