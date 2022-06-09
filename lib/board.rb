@@ -59,11 +59,22 @@ class Board
   def find_moves(chosen_piece)
     valid_moves = []
 
-    chosen_piece.movement.each do |move|
-      valid_moves.append(move) if check_valid_move?(move) && empty_space?(move)
+    chosen_piece.movement.each do |move_direction|
+      move_direction.each do |move|
+        if check_valid_move?(move)
+          break if same_team?(move)
+
+          valid_moves.append(move) if empty_space?(move)
+
+          if opponent_team?(move)
+            valid_moves.append(move)
+            break
+          end
+        end
+      end
     end
 
-    valid_moves.sort
+    valid_moves
   end
 
   # Returns true if a given position is a valid move.
@@ -80,9 +91,28 @@ class Board
   # Returns true if a move given is currently empty.
   # Returns false otherwise.
   def empty_space?(move)
-    @curr_team.each { |piece| return false if piece.position == move }
+    empty = true
+    
+    @curr_team.each { |piece| empty = false if piece.position == move }
+    @opponent_team.each { |piece| empty = false if piece.position == move }
 
-    return true
+    return empty
+  end
+
+  # Returns true if the move given currently has a piece from the same team.
+  # Returns false otherwise.
+  def same_team?(move)
+    @curr_team.each { |piece| return true if piece.position == move }
+
+    return false
+  end
+
+  # Returns true if the move given currently has a piece from the opponent's team.
+  # Returns false otherwise.
+  def opponent_team?(move)
+    @opponent_team.each { |piece| return true if piece.position == move }
+
+    return false
   end
 
   # Returns the piece object at a given position.
