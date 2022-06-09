@@ -14,18 +14,22 @@ class Knight
     @token = token
   end
 
-  # Returns every valid or invalid move as an array from this piece's position.
+  # Returns a 2D array of every valid or invalid move from this piece's position.
+  # Each array in the 2D array is a separate direction.
   def movement
     all_moves = []
+    moves = []
 
-    all_moves.append( [(file.ord + 1).chr, rank + 2] )
-    all_moves.append( [(file.ord + 1).chr, rank - 2] )
-    all_moves.append( [(file.ord - 1).chr, rank - 2] )
-    all_moves.append( [(file.ord - 1).chr, rank + 2] )
-    all_moves.append( [(file.ord + 2).chr, rank + 1] )
-    all_moves.append( [(file.ord + 2).chr, rank - 1] )
-    all_moves.append( [(file.ord - 2).chr, rank - 1] )
-    all_moves.append( [(file.ord - 2).chr, rank + 1] )
+    moves.append( [(file.ord + 1).chr, rank + 2] )
+    moves.append( [(file.ord + 1).chr, rank - 2] )
+    moves.append( [(file.ord - 1).chr, rank - 2] )
+    moves.append( [(file.ord - 1).chr, rank + 2] )
+    moves.append( [(file.ord + 2).chr, rank + 1] )
+    moves.append( [(file.ord + 2).chr, rank - 1] )
+    moves.append( [(file.ord - 2).chr, rank - 1] )
+    moves.append( [(file.ord - 2).chr, rank + 1] )
+
+    all_moves.append(moves)
 
     all_moves
   end

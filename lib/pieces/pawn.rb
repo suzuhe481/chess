@@ -13,12 +13,16 @@ class Pawn
     @token = token
   end
 
-  # Returns every valid or invalid move as an array from this piece's position.
+  # Returns a 2D array of every valid or invalid move from this piece's position.
+  # Each array in the 2D array is a separate direction.
   def movement
     all_moves = []
+    moves_up = []
 
-    all_moves.append( [(file.ord).chr, rank + 1] )
-    all_moves.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+    moves_up.append( [(file.ord).chr, rank + 1] )
+    moves_up.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+
+    all_moves.append(moves_up)
 
     all_moves
   end

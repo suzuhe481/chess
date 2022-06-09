@@ -12,17 +12,27 @@ class Rook
     @token = token
   end
 
-  # Returns every valid or invalid move as an array from this piece's position.
+  # Returns a 2D array of every valid or invalid move from this piece's position.
+  # Each array in the 2D array is a separate direction.
   def movement
     all_moves = []
+    moves_up = []
+    moves_down = []
+    moves_left = []
+    moves_right = []
     max_range = (1..7)
 
     max_range.each do |spaces|
-      all_moves.append( [(file.ord + spaces).chr, rank] )
-      all_moves.append( [(file.ord - spaces).chr, rank] )
-      all_moves.append( [(file.ord).chr, rank + spaces] )
-      all_moves.append( [(file.ord).chr, rank - spaces] )
+      moves_up.append([(file.ord).chr, rank + spaces])
+      moves_down.append([(file.ord).chr, rank - spaces])
+      moves_left.append([(file.ord - spaces).chr, rank])
+      moves_right.append([(file.ord + spaces).chr, rank])
     end
+
+    all_moves.append(moves_up)
+    all_moves.append(moves_down)
+    all_moves.append(moves_left)
+    all_moves.append(moves_right)
 
     all_moves
   end
