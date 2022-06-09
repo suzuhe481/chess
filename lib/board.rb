@@ -136,6 +136,22 @@ class Board
     @opponent_team = temp_team
   end
 
+  # Returns true if the opponent's king is in check.
+  # Returns false otherwise.
+  def opponent_in_check?
+    opp_king_position = @opponent_team.detect { |piece| piece.class.to_s == "King" }.position
+
+    @curr_team.each do |piece|
+      moves = find_moves(piece)
+
+      moves.each do |move|
+        return true if move == opp_king_position
+      end
+    end
+
+    false
+  end
+
   # Prints the current board.
   def print_board
     # Sideways board
