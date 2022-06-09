@@ -202,10 +202,14 @@ class Board
 
   # Displays the board.
   def display_board(board_arr, empty_token)
-    puts " _______________________________________________________"
+    nums_enum = (1..8).reverse_each
+    
+    puts "    _______________________________________________________"
     board_arr.each do |row|
-      puts "|      |      |      |      |      |      |      |      |"
+      puts "   |      |      |      |      |      |      |      |      |"
 
+      row_num = nums_enum.next
+      print " #{row_num} "
       row.each do |piece|
         if piece == empty_token
           print "|  #{piece}"
@@ -216,8 +220,17 @@ class Board
       print "|"
       puts
 
-      print "|______|______|______|______|______|______|______|______|"
+      print "   |______|______|______|______|______|______|______|______|"
       puts
     end
+
+    letters = ("a".."h")
+    print "   "
+    letters.each do |letter|
+      print "   "
+      print letter
+      print "   "
+    end
+    puts
   end
 end
