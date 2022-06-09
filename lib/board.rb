@@ -135,4 +135,73 @@ class Board
     @curr_team = @opponent_team
     @opponent_team = temp_team
   end
+
+  # Prints the current board.
+  def print_board
+    # Sideways board
+    board_arr = Array.new(8) { Array.new(8) }
+    empty_token = "    "
+
+    # Placing empty spaces.
+    board_arr.each_with_index do |file, file_index|
+      file.each_with_index do |_rank, rank_index|
+        board_arr[file_index][rank_index] = empty_token
+      end
+    end
+
+    board_arr = populate_curr_team(board_arr)
+    board_arr = populate_opponent_team(board_arr)
+
+    # Rotates the board.
+    board_arr = board_arr.map(&:reverse).transpose
+
+    display_board(board_arr, empty_token)
+  end
+
+  private
+
+  # Places current team pieces on board.
+  def populate_curr_team(board_arr)
+    @curr_team.each do |piece|
+      piece_file = piece.file.ord - 96
+      piece_rank = piece.rank
+
+      board_arr[piece_file - 1][piece_rank - 1] = piece
+    end
+
+    board_arr
+  end
+
+  # Places opponent team pieces on board.
+  def populate_opponent_team(board_arr)
+    @opponent_team.each do |piece|
+      piece_file = piece.file.ord - 96
+      piece_rank = piece.rank
+
+      board_arr[piece_file - 1][piece_rank - 1] = piece
+    end
+    
+    board_arr
+  end
+
+  # Displays the board.
+  def display_board(board_arr, empty_token)
+    puts " _______________________________________________________"
+    board_arr.each do |row|
+      puts "|      |      |      |      |      |      |      |      |"
+
+      row.each do |piece|
+        if piece == empty_token
+          print "|  #{piece}"
+        else
+          print "| #{piece.token} "
+        end
+      end
+      print "|"
+      puts
+
+      print "|______|______|______|______|______|______|______|______|"
+      puts
+    end
+  end
 end
