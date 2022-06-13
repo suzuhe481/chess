@@ -179,6 +179,30 @@ class Board
     false
   end
 
+  # Returns true if the current team's king is in checkmate.
+  # Returns false otherwise.
+  def in_checkmate?
+    curr_king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+    original_position = curr_king.position
+
+    king_moves = find_moves(curr_king)
+    king_moves.unshift(curr_king.position)
+    p king_moves
+
+    king_moves.each do |move|
+      curr_king.move_to(move[0], move[1])
+      print_board
+
+      curr_king.move_to(original_position[0], original_position[1])
+      return false unless in_check?
+    end
+
+    curr_king.move_to(original_position[0], original_position[1])
+    true
+  end
+
+
+
   # Prints the current board.
   def print_board
     # Sideways board
