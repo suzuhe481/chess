@@ -18,16 +18,22 @@ class Pawn
   def movement
     all_moves = []
     moves_forward = []
+    moves_diagonal = []
 
     if @token[0] == "W"
       moves_forward.append( [(file.ord).chr, rank + 1] )
       moves_forward.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+      moves_diagonal.append( [(file.ord + 1).chr, rank + 1] )
+      moves_diagonal.append( [(file.ord - 1).chr, rank + 1] )
     else
       moves_forward.append( [(file.ord).chr, rank - 1] )
       moves_forward.append( [(file.ord).chr, rank - 2] ) if @first_move == true
+      moves_diagonal.append( [(file.ord + 1).chr, rank - 1] )
+      moves_diagonal.append( [(file.ord - 1).chr, rank - 1] )
     end
 
     all_moves.append(moves_forward)
+    all_moves.append(moves_diagonal)
 
     all_moves
   end
@@ -37,5 +43,7 @@ class Pawn
     @file = file
     @rank = rank
     @position = [file, rank]
+
+    @first_move = false
   end
 end
