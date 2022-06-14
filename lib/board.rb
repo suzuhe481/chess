@@ -68,20 +68,31 @@ class Board
   # Finds valid moves if the chosen piece is for the current team.
   def find_moves_for_curr_team(chosen_piece)
     valid_moves = []
-    chosen_piece.movement.each do |move_direction|
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
       move_direction.each do |move|
         if check_valid_move?(move)
           break if same_team?(move)
 
-          valid_moves.append(move) if empty_space?(move)
+          # For pawns.
+          if chosen_piece.token[2, 2] == "Pa"
+            diagonal_index = [1, 2]
+            valid_moves.append(move) if empty_space?(move) && index == 0
 
-          if opponent_team?(move)
-            valid_moves.append(move)
-            break
+            valid_moves.append(move) if opponent_team?(move) && diagonal_index.include?(index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if opponent_team?(move)
+              valid_moves.append(move)
+              break
+            end
           end
         end
       end
     end
+
     valid_moves
   end
 
@@ -89,20 +100,32 @@ class Board
   # Finds valid moves if the chosen piece is for the opponent's team.
   def find_moves_for_opp_team(chosen_piece)
     valid_moves = []
-    chosen_piece.movement.each do |move_direction|
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
       move_direction.each do |move|
         if check_valid_move?(move)
           break if opponent_team?(move)
 
-          valid_moves.append(move) if empty_space?(move)
+          # For pawns.
+          if chosen_piece.token[2, 2] == "Pa"
+            puts "move #{move}"
+            diagonal_index = [1, 2]
+            valid_moves.append(move) if empty_space?(move) && index == 0
 
-          if same_team?(move)
-            valid_moves.append(move)
-            break
+            valid_moves.append(move) if same_team?(move) && diagonal_index.include?(index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if same_team?(move)
+              valid_moves.append(move)
+              break
+            end
           end
         end
       end
     end
+    # end
     valid_moves
   end
 
@@ -160,7 +183,7 @@ class Board
 
     @curr_team_captures.append(piece_to_capture)
 
-    @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture}
+    @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
   end
 
   # Switches the current and opponent player.
@@ -215,8 +238,6 @@ class Board
     curr_king.move_to(original_position[0], original_position[1])
     true
   end
-
-
 
   # Prints the current board.
   def print_board
