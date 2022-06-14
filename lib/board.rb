@@ -1,13 +1,14 @@
 # Board object.
 # Containing all of the pieces of the game.
 class Board
-  attr_accessor :curr_player, :opponent_player, :curr_team, :opponent_team
+  attr_accessor :curr_player, :opponent_player, :curr_team, :opponent_team, :curr_team_captures, :opponent_team_captures
 
   def initialize
     @curr_player = "Player 1"
     @opponent_player = "Player 2"
 
     @curr_team = []
+    @curr_team_captures = []
     # Player 1 Pawns
     @curr_team.append(Pawn.new("a", 2, "Player 1", "W_Pa"))
     @curr_team.append(Pawn.new("b", 2, "Player 1", "W_Pa"))
@@ -32,6 +33,7 @@ class Board
     
 
     @opponent_team = []
+    @opponent_team_captures = []
     # # Player 2 Pawns
     @opponent_team.append(Pawn.new("a", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("b", 7, "Player 2", "B_Pa"))
@@ -152,6 +154,15 @@ class Board
     return nil
   end
 
+  # For the current team, captures the piece at the given position.
+  def capture_piece_at(position)
+    piece_to_capture = get_piece_at(position)
+
+    @curr_team_captures.append(piece_to_capture)
+
+    @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture}
+  end
+
   # Switches the current and opponent player.
   def switch_player
     temp_player = @curr_player
@@ -161,6 +172,10 @@ class Board
     temp_team = @curr_team
     @curr_team = @opponent_team
     @opponent_team = temp_team
+
+    temp_capture = @curr_team_captures
+    @curr_team_captures = @opponent_team_captures
+    @opponent_team_captures = temp_capture
   end
 
   # Returns true if the current team's king is in check.
