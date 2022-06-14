@@ -32,7 +32,7 @@ class Board
     
 
     @opponent_team = []
-    # Player 2 Pawns
+    # # Player 2 Pawns
     @opponent_team.append(Pawn.new("a", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("b", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("c", 7, "Player 2", "B_Pa"))
@@ -41,7 +41,7 @@ class Board
     @opponent_team.append(Pawn.new("f", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("g", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("h", 7, "Player 2", "B_Pa"))
-    # Player 2 Rooks
+    # # Player 2 Rooks
     @opponent_team.append(Rook.new("a", 8, "Player 2", "B_Ro"))
     @opponent_team.append(Rook.new("h", 8, "Player 2", "B_Ro"))
     # Player 2 Knights
@@ -57,8 +57,15 @@ class Board
 
   # Returns a sorted array of valid moves from a given piece's current position.
   def find_moves(chosen_piece)
-    valid_moves = []
+    return find_moves_for_curr_team(chosen_piece) if @curr_team.include?(get_piece_at(chosen_piece.position))
+      
+    return find_moves_for_opp_team(chosen_piece)
+  end
 
+  # Helper function for find_moves
+  # Finds valid moves if the chosen piece is for the current team.
+  def find_moves_for_curr_team(chosen_piece)
+    valid_moves = []
     chosen_piece.movement.each do |move_direction|
       move_direction.each do |move|
         if check_valid_move?(move)
@@ -73,7 +80,27 @@ class Board
         end
       end
     end
+    valid_moves
+  end
 
+  # Helper function for find_moves
+  # Finds valid moves if the chosen piece is for the opponent's team.
+  def find_moves_for_opp_team(chosen_piece)
+    valid_moves = []
+    chosen_piece.movement.each do |move_direction|
+      move_direction.each do |move|
+        if check_valid_move?(move)
+          break if opponent_team?(move)
+
+          valid_moves.append(move) if empty_space?(move)
+
+          if same_team?(move)
+            valid_moves.append(move)
+            break
+          end
+        end
+      end
+    end
     valid_moves
   end
 
@@ -136,6 +163,22 @@ class Board
     @opponent_team = temp_team
   end
 
+  # Returns true if the current team's king is in check.
+  # Returns false otherwise.
+  def in_check?
+    king_position = @curr_team.detect { |piece| piece.class.to_s == "King" }.position
+
+    @opponent_team.each do |piece|
+      moves = find_moves(piece)
+
+      moves.each do |move|
+        return true if move == king_position
+      end
+    end
+
+    false
+  end
+
   # Prints the current board.
   def print_board
     # Sideways board
@@ -186,10 +229,14 @@ class Board
 
   # Displays the board.
   def display_board(board_arr, empty_token)
-    puts " _______________________________________________________"
+    nums_enum = (1..8).reverse_each
+    
+    puts "    _______________________________________________________"
     board_arr.each do |row|
-      puts "|      |      |      |      |      |      |      |      |"
+      puts "   |      |      |      |      |      |      |      |      |"
 
+      row_num = nums_enum.next
+      print " #{row_num} "
       row.each do |piece|
         if piece == empty_token
           print "|  #{piece}"
@@ -200,8 +247,17 @@ class Board
       print "|"
       puts
 
-      print "|______|______|______|______|______|______|______|______|"
+      print "   |______|______|______|______|______|______|______|______|"
       puts
     end
+
+    letters = ("a".."h")
+    print "   "
+    letters.each do |letter|
+      print "   "
+      print letter
+      print "   "
+    end
+    puts
   end
 end
