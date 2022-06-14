@@ -17,12 +17,17 @@ class Pawn
   # Each array in the 2D array is a separate direction.
   def movement
     all_moves = []
-    moves_up = []
+    moves_forward = []
 
-    moves_up.append( [(file.ord).chr, rank + 1] )
-    moves_up.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+    if @token[0] == "W"
+      moves_forward.append( [(file.ord).chr, rank + 1] )
+      moves_forward.append( [(file.ord).chr, rank + 2] ) if @first_move == true
+    else
+      moves_forward.append( [(file.ord).chr, rank - 1] )
+      moves_forward.append( [(file.ord).chr, rank - 2] ) if @first_move == true
+    end
 
-    all_moves.append(moves_up)
+    all_moves.append(moves_forward)
 
     all_moves
   end
