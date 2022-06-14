@@ -37,5 +37,7 @@ class Pawn
     @file = file
     @rank = rank
     @position = [file, rank]
+
+    @first_move = false
   end
 end
