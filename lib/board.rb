@@ -1,7 +1,8 @@
 # Board object.
 # Containing all of the pieces of the game.
 class Board
-  attr_accessor :curr_player, :opponent_player, :curr_team, :opponent_team, :curr_team_captures, :opponent_team_captures
+  attr_accessor :curr_player,  :curr_team, :curr_team_captures, 
+                :opponent_player, :opponent_team, :opponent_team_captures
 
   def initialize
     @curr_player = "Player 1"
@@ -184,6 +185,30 @@ class Board
     @curr_team_captures.append(piece_to_capture)
 
     @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
+  end
+
+  # Promotes a given pawn to the given type for the current player.
+  def promote_pawn_to(pawn, type)
+    pawn_pos = pawn.position
+    pawn_owner = pawn.owner
+    pawn_color = pawn.token[0]
+    
+    @curr_team = @curr_team.reject { |piece| piece == pawn }
+
+    case type
+    when "Pa"
+      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
+    when "Ro"
+      @curr_team.append(Rook.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Ro"))
+    when "Kn"
+      @curr_team.append(Knight.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Kn"))
+    when "Bi"
+      @curr_team.append(Bishop.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Bi"))
+    when "Qu"
+      @curr_team.append(Queen.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Qu"))
+    else
+      puts "Invalid piece type"
+    end
   end
 
   # Switches the current and opponent player.
