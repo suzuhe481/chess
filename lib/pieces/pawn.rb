@@ -21,7 +21,6 @@ class Pawn
     moves_forward = []
     moves_diagonal_1 = []
     moves_diagonal_2 = []
-    moves_en_passant = []
 
     if @token[0] == "W"
       moves_forward.append( [(file.ord).chr, rank + 1] )
@@ -35,13 +34,9 @@ class Pawn
       moves_diagonal_2.append( [(file.ord - 1).chr, rank - 1] )
     end
 
-    moves_en_passant.append( [(file.ord - 1).chr, rank] )
-    moves_en_passant.append( [(file.ord + 1).chr, rank] )
-
     all_moves.append(moves_forward)
     all_moves.append(moves_diagonal_1)
     all_moves.append(moves_diagonal_2)
-    all_moves.append(moves_en_passant)
 
     all_moves
   end
