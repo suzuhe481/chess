@@ -67,6 +67,9 @@ class Board
 
   # Helper function for find_moves
   # Finds valid moves if the chosen piece is for the current team.
+  # PAWN NOTES
+  # Index = 0: Vertical movement
+  # Index = 1 or 2: Diagonal movement
   def find_moves_for_curr_team(chosen_piece)
     valid_moves = []
 
@@ -110,8 +113,7 @@ class Board
           break if opponent_team?(move)
 
           # For pawns.
-          if chosen_piece.token[2, 2] == "Pa"
-            puts "move #{move}"
+          if chosen_piece.instance_of?(Pawn)
             diagonal_index = [1, 2]
             valid_moves.append(move) if empty_space?(move) && index == 0
 
@@ -367,15 +369,13 @@ class Board
     piece_left_of = get_piece_at([left_file, chosen_piece.rank])
     piece_right_of = get_piece_at([right_file, chosen_piece.rank])
 
-    if (!piece_left_of.nil? && 
-       move[0] == piece_left_of.file &&
-       piece_left_of.en_passant_capturable == true) ||
-       (!piece_right_of.nil? && 
-       move[0] == piece_right_of.file &&
-       piece_right_of.en_passant_capturable == true)
+    return true if piece_left_of.instance_of?(Pawn) && 
+                   piece_left_of.en_passant_capturable == true && 
+                   move[0] == piece_left_of.file
 
-      return true
-    end
+    return true if piece_right_of.instance_of?(Pawn) && 
+                   piece_right_of.en_passant_capturable == true && 
+                   move[0] == piece_right_of.file
 
     return false
   end
