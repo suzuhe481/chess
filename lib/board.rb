@@ -76,11 +76,13 @@ class Board
           break if same_team?(move)
 
           # For pawns.
-          if chosen_piece.token[2, 2] == "Pa"
+          if chosen_piece.instance_of?(Pawn)
             diagonal_index = [1, 2]
             valid_moves.append(move) if empty_space?(move) && index == 0
 
             valid_moves.append(move) if opponent_team?(move) && diagonal_index.include?(index)
+
+            valid_moves.append(move) if en_passant_capturable?(chosen_piece, move) && diagonal_index.include?(index)
           # For all other pieces.
           else
             valid_moves.append(move) if empty_space?(move)
@@ -114,6 +116,8 @@ class Board
             valid_moves.append(move) if empty_space?(move) && index == 0
 
             valid_moves.append(move) if same_team?(move) && diagonal_index.include?(index)
+
+            valid_moves.append(move) if en_passant_capturable?(chosen_piece, move) && diagonal_index.include?(index)
           # For all other pieces.
           else
             valid_moves.append(move) if empty_space?(move)
@@ -211,8 +215,16 @@ class Board
     end
   end
 
+  # Makes all of the opponent's pawns' en_passant_capturable variables equal to false.
+  # MUST BE RUN AT THE END OF EVERY TURN.
+  def reset_opponent_en_passant
+    @opponent_team = @opponent_team.each { |piece| piece.en_passant_capturable = false if piece.instance_of?(Pawn) }
+  end
+
   # Switches the current and opponent player.
   def switch_player
+    reset_opponent_en_passant
+
     temp_player = @curr_player
     @curr_player = @opponent_player
     @opponent_player = temp_player
@@ -344,5 +356,27 @@ class Board
       print "   "
     end
     puts
+  end
+
+  # Returns true if the chosen piece can go to given move via en passant.
+  # Returns false otherwise.
+  def en_passant_capturable?(chosen_piece, move)
+    left_file = (chosen_piece.file.ord - 1).chr
+    right_file = (chosen_piece.file.ord + 1).chr
+
+    piece_left_of = get_piece_at([left_file, chosen_piece.rank])
+    piece_right_of = get_piece_at([right_file, chosen_piece.rank])
+
+    if (!piece_left_of.nil? && 
+       move[0] == piece_left_of.file &&
+       piece_left_of.en_passant_capturable == true) ||
+       (!piece_right_of.nil? && 
+       move[0] == piece_right_of.file &&
+       piece_right_of.en_passant_capturable == true)
+
+      return true
+    end
+
+    return false
   end
 end
