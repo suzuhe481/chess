@@ -1,13 +1,15 @@
 # Board object.
 # Containing all of the pieces of the game.
 class Board
-  attr_accessor :curr_player, :opponent_player, :curr_team, :opponent_team
+  attr_accessor :curr_player,  :curr_team, :curr_team_captures, 
+                :opponent_player, :opponent_team, :opponent_team_captures
 
   def initialize
     @curr_player = "Player 1"
     @opponent_player = "Player 2"
 
     @curr_team = []
+    @curr_team_captures = []
     # Player 1 Pawns
     @curr_team.append(Pawn.new("a", 2, "Player 1", "W_Pa"))
     @curr_team.append(Pawn.new("b", 2, "Player 1", "W_Pa"))
@@ -32,6 +34,7 @@ class Board
     
 
     @opponent_team = []
+    @opponent_team_captures = []
     # # Player 2 Pawns
     @opponent_team.append(Pawn.new("a", 7, "Player 2", "B_Pa"))
     @opponent_team.append(Pawn.new("b", 7, "Player 2", "B_Pa"))
@@ -66,20 +69,31 @@ class Board
   # Finds valid moves if the chosen piece is for the current team.
   def find_moves_for_curr_team(chosen_piece)
     valid_moves = []
-    chosen_piece.movement.each do |move_direction|
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
       move_direction.each do |move|
         if check_valid_move?(move)
           break if same_team?(move)
 
-          valid_moves.append(move) if empty_space?(move)
+          # For pawns.
+          if chosen_piece.token[2, 2] == "Pa"
+            diagonal_index = [1, 2]
+            valid_moves.append(move) if empty_space?(move) && index == 0
 
-          if opponent_team?(move)
-            valid_moves.append(move)
-            break
+            valid_moves.append(move) if opponent_team?(move) && diagonal_index.include?(index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if opponent_team?(move)
+              valid_moves.append(move)
+              break
+            end
           end
         end
       end
     end
+
     valid_moves
   end
 
@@ -87,20 +101,32 @@ class Board
   # Finds valid moves if the chosen piece is for the opponent's team.
   def find_moves_for_opp_team(chosen_piece)
     valid_moves = []
-    chosen_piece.movement.each do |move_direction|
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
       move_direction.each do |move|
         if check_valid_move?(move)
           break if opponent_team?(move)
 
-          valid_moves.append(move) if empty_space?(move)
+          # For pawns.
+          if chosen_piece.token[2, 2] == "Pa"
+            puts "move #{move}"
+            diagonal_index = [1, 2]
+            valid_moves.append(move) if empty_space?(move) && index == 0
 
-          if same_team?(move)
-            valid_moves.append(move)
-            break
+            valid_moves.append(move) if same_team?(move) && diagonal_index.include?(index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if same_team?(move)
+              valid_moves.append(move)
+              break
+            end
           end
         end
       end
     end
+    # end
     valid_moves
   end
 
@@ -152,6 +178,39 @@ class Board
     return nil
   end
 
+  # For the current team, captures the piece at the given position.
+  def capture_piece_at(position)
+    piece_to_capture = get_piece_at(position)
+
+    @curr_team_captures.append(piece_to_capture)
+
+    @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
+  end
+
+  # Promotes a given pawn to the given type for the current player.
+  def promote_pawn_to(pawn, type)
+    pawn_pos = pawn.position
+    pawn_owner = pawn.owner
+    pawn_color = pawn.token[0]
+    
+    @curr_team = @curr_team.reject { |piece| piece == pawn }
+
+    case type
+    when "Pa"
+      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
+    when "Ro"
+      @curr_team.append(Rook.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Ro"))
+    when "Kn"
+      @curr_team.append(Knight.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Kn"))
+    when "Bi"
+      @curr_team.append(Bishop.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Bi"))
+    when "Qu"
+      @curr_team.append(Queen.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Qu"))
+    else
+      puts "Invalid piece type"
+    end
+  end
+
   # Switches the current and opponent player.
   def switch_player
     temp_player = @curr_player
@@ -161,6 +220,10 @@ class Board
     temp_team = @curr_team
     @curr_team = @opponent_team
     @opponent_team = temp_team
+
+    temp_capture = @curr_team_captures
+    @curr_team_captures = @opponent_team_captures
+    @opponent_team_captures = temp_capture
   end
 
   # Returns true if the current team's king is in check.
@@ -177,6 +240,28 @@ class Board
     end
 
     false
+  end
+
+  # Returns true if the current team's king is in checkmate.
+  # Returns false otherwise.
+  def in_checkmate?
+    curr_king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+    original_position = curr_king.position
+
+    king_moves = find_moves(curr_king)
+    king_moves.unshift(curr_king.position)
+    p king_moves
+
+    king_moves.each do |move|
+      curr_king.move_to(move[0], move[1])
+      print_board
+
+      curr_king.move_to(original_position[0], original_position[1])
+      return false unless in_check?
+    end
+
+    curr_king.move_to(original_position[0], original_position[1])
+    true
   end
 
   # Prints the current board.
