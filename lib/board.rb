@@ -60,9 +60,31 @@ class Board
 
   # Returns a sorted array of valid moves from a given piece's current position.
   def find_moves(chosen_piece)
+    return nil if chosen_piece.nil?
+
     return find_moves_for_curr_team(chosen_piece) if @curr_team.include?(get_piece_at(chosen_piece.position))
       
     return find_moves_for_opp_team(chosen_piece)
+  end
+
+  # Moves a given piece to the selected move from the movement_arr.
+  def move_piece_to(piece, movement_arr, move_choice)
+    move = movement_arr[move_choice - 1]
+
+    if piece.instance_of?(Pawn) && en_passant_capturable?(piece,move)
+      capture = if piece.token[0] == "W"
+                  [move[0], move[1] - 1]
+                else
+                  [move[0], move[1] + 1]
+                end
+
+      capture_piece_at(capture)
+    else
+      capture = move
+    end
+
+    capture_piece_at(capture)
+    piece.move_to(move[0], move[1])
   end
 
   # Returns true if the move given currently has a piece from the opponent's team.
