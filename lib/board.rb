@@ -65,36 +65,6 @@ class Board
     return find_moves_for_opp_team(chosen_piece)
   end
 
-  # Returns true if a given position is a valid move.
-  # Returns false otherwise.
-  def check_valid_move?(move)
-    file_pos_reg_exp = /^[a-h]$/
-    rank_pos_reg_exp = /^[1-8]$/
-
-    return true if move[0].match(file_pos_reg_exp) && move[1].to_s.match(rank_pos_reg_exp)
-
-    return false
-  end
-
-  # Returns true if a move given is currently empty.
-  # Returns false otherwise.
-  def empty_space?(move)
-    empty = true
-    
-    @curr_team.each { |piece| empty = false if piece.position == move }
-    @opponent_team.each { |piece| empty = false if piece.position == move }
-
-    return empty
-  end
-
-  # Returns true if the move given currently has a piece from the same team.
-  # Returns false otherwise.
-  def same_team?(move)
-    @curr_team.each { |piece| return true if piece.position == move }
-
-    return false
-  end
-
   # Returns true if the move given currently has a piece from the opponent's team.
   # Returns false otherwise.
   def opponent_team?(move)
@@ -144,12 +114,6 @@ class Board
     else
       puts "Invalid piece type"
     end
-  end
-
-  # Makes all of the opponent's pawns' en_passant_capturable variables equal to false.
-  # MUST BE RUN AT THE END OF EVERY TURN.
-  def reset_opponent_en_passant
-    @opponent_team = @opponent_team.each { |piece| piece.en_passant_capturable = false if piece.instance_of?(Pawn) }
   end
 
   # Switches the current and opponent player.
@@ -289,6 +253,36 @@ class Board
     puts
   end
 
+  # Returns true if a given position is a valid move.
+  # Returns false otherwise.
+  def check_valid_move?(move)
+    file_pos_reg_exp = /^[a-h]$/
+    rank_pos_reg_exp = /^[1-8]$/
+
+    return true if move[0].match(file_pos_reg_exp) && move[1].to_s.match(rank_pos_reg_exp)
+
+    return false
+  end
+
+  # Returns true if a move given is currently empty.
+  # Returns false otherwise.
+  def empty_space?(move)
+    empty = true
+    
+    @curr_team.each { |piece| empty = false if piece.position == move }
+    @opponent_team.each { |piece| empty = false if piece.position == move }
+
+    return empty
+  end
+
+  # Returns true if the move given currently has a piece from the same team.
+  # Returns false otherwise.
+  def same_team?(move)
+    @curr_team.each { |piece| return true if piece.position == move }
+
+    return false
+  end
+
   # Helper function for #find_moves
   # Finds valid moves if the chosen piece is for the current team.
   def find_moves_for_curr_team(chosen_piece)
@@ -399,5 +393,11 @@ class Board
                    move[0] == piece_right_of.file
 
     return false
+  end
+
+  # Makes all of the opponent's pawns' en_passant_capturable variables equal to false.
+  # MUST BE RUN AT THE END OF EVERY TURN.
+  def reset_opponent_en_passant
+    @opponent_team = @opponent_team.each { |piece| piece.en_passant_capturable = false if piece.instance_of?(Pawn) }
   end
 end
