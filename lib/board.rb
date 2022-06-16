@@ -60,112 +60,31 @@ class Board
 
   # Returns a sorted array of valid moves from a given piece's current position.
   def find_moves(chosen_piece)
+    return nil if chosen_piece.nil?
+
     return find_moves_for_curr_team(chosen_piece) if @curr_team.include?(get_piece_at(chosen_piece.position))
       
     return find_moves_for_opp_team(chosen_piece)
   end
 
-  # Helper function for find_moves
-  # Finds valid moves if the chosen piece is for the current team.
-  def find_moves_for_curr_team(chosen_piece)
-    valid_moves = []
+  # Moves a given piece to the selected move from the movement_arr.
+  def move_piece_to(piece, movement_arr, move_choice)
+    move = movement_arr[move_choice - 1]
 
-    chosen_piece.movement.each_with_index do |move_direction, index|
-      move_direction.each do |move|
-        if check_valid_move?(move)
-          break if same_team?(move)
+    if piece.instance_of?(Pawn) && en_passant_capturable?(piece,move)
+      capture = if piece.token[0] == "W"
+                  [move[0], move[1] - 1]
+                else
+                  [move[0], move[1] + 1]
+                end
 
-          # For pawns.
-          if chosen_piece.token[2, 2] == "Pa"
-            diagonal_index = [1, 2]
-            valid_moves.append(move) if empty_space?(move) && index == 0
-
-            valid_moves.append(move) if opponent_team?(move) && diagonal_index.include?(index)
-          # For all other pieces.
-          else
-            valid_moves.append(move) if empty_space?(move)
-
-            if opponent_team?(move)
-              valid_moves.append(move)
-              break
-            end
-          end
-        end
-      end
+      capture_piece_at(capture)
+    else
+      capture = move
     end
 
-    valid_moves
-  end
-
-  # Helper function for find_moves
-  # Finds valid moves if the chosen piece is for the opponent's team.
-  def find_moves_for_opp_team(chosen_piece)
-    valid_moves = []
-
-    chosen_piece.movement.each_with_index do |move_direction, index|
-      move_direction.each do |move|
-        if check_valid_move?(move)
-          break if opponent_team?(move)
-
-          # For pawns.
-          if chosen_piece.token[2, 2] == "Pa"
-            puts "move #{move}"
-            diagonal_index = [1, 2]
-            valid_moves.append(move) if empty_space?(move) && index == 0
-
-            valid_moves.append(move) if same_team?(move) && diagonal_index.include?(index)
-          # For all other pieces.
-          else
-            valid_moves.append(move) if empty_space?(move)
-
-            if same_team?(move)
-              valid_moves.append(move)
-              break
-            end
-          end
-        end
-      end
-    end
-    # end
-    valid_moves
-  end
-
-  # Returns true if a given position is a valid move.
-  # Returns false otherwise.
-  def check_valid_move?(move)
-    file_pos_reg_exp = /^[a-h]$/
-    rank_pos_reg_exp = /^[1-8]$/
-
-    return true if move[0].match(file_pos_reg_exp) && move[1].to_s.match(rank_pos_reg_exp)
-
-    return false
-  end
-
-  # Returns true if a move given is currently empty.
-  # Returns false otherwise.
-  def empty_space?(move)
-    empty = true
-    
-    @curr_team.each { |piece| empty = false if piece.position == move }
-    @opponent_team.each { |piece| empty = false if piece.position == move }
-
-    return empty
-  end
-
-  # Returns true if the move given currently has a piece from the same team.
-  # Returns false otherwise.
-  def same_team?(move)
-    @curr_team.each { |piece| return true if piece.position == move }
-
-    return false
-  end
-
-  # Returns true if the move given currently has a piece from the opponent's team.
-  # Returns false otherwise.
-  def opponent_team?(move)
-    @opponent_team.each { |piece| return true if piece.position == move }
-
-    return false
+    capture_piece_at(capture)
+    piece.move_to(move[0], move[1])
   end
 
   # Returns the piece object at a given position.
@@ -182,6 +101,8 @@ class Board
   def capture_piece_at(position)
     piece_to_capture = get_piece_at(position)
 
+    return if piece_to_capture.nil?
+
     @curr_team_captures.append(piece_to_capture)
 
     @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
@@ -189,6 +110,8 @@ class Board
 
   # Promotes a given pawn to the given type for the current player.
   def promote_pawn_to(pawn, type)
+    return "Error. Can't promote piece." if pawn.rank != 8 && pawn.rank != 1
+
     pawn_pos = pawn.position
     pawn_owner = pawn.owner
     pawn_color = pawn.token[0]
@@ -213,6 +136,8 @@ class Board
 
   # Switches the current and opponent player.
   def switch_player
+    reset_opponent_en_passant
+
     temp_player = @curr_player
     @curr_player = @opponent_player
     @opponent_player = temp_player
@@ -344,5 +269,161 @@ class Board
       print "   "
     end
     puts
+  end
+
+  # Returns true if a given position is a valid move.
+  # Returns false otherwise.
+  def check_valid_move?(move)
+    file_pos_reg_exp = /^[a-h]$/
+    rank_pos_reg_exp = /^[1-8]$/
+
+    return true if move[0].match(file_pos_reg_exp) && move[1].to_s.match(rank_pos_reg_exp)
+
+    return false
+  end
+
+  # Returns true if a move given is currently empty.
+  # Returns false otherwise.
+  def empty_space?(move)
+    empty = true
+    
+    @curr_team.each { |piece| empty = false if piece.position == move }
+    @opponent_team.each { |piece| empty = false if piece.position == move }
+
+    return empty
+  end
+
+  # Returns true if the move given currently has a piece from the same team.
+  # Returns false otherwise.
+  def same_team?(move)
+    @curr_team.each { |piece| return true if piece.position == move }
+
+    return false
+  end
+
+  # Returns true if the move given currently has a piece from the opponent's team.
+  # Returns false otherwise.
+  def opponent_team?(move)
+    @opponent_team.each { |piece| return true if piece.position == move }
+
+    return false
+  end
+
+  # Helper function for #find_moves
+  # Finds valid moves if the chosen piece is for the current team.
+  def find_moves_for_curr_team(chosen_piece)
+    valid_moves = []
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
+      move_direction.each do |move|
+        if check_valid_move?(move)
+          break if same_team?(move)
+
+          # For pawns.
+          if chosen_piece.instance_of?(Pawn)
+            valid_moves.append(move) if valid_pawn_move_curr_team?(chosen_piece, move, index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if opponent_team?(move)
+              valid_moves.append(move)
+              break
+            end
+          end
+        end
+      end
+    end
+
+    valid_moves
+  end
+
+  # Helper function for #find_moves_for_curr_team
+  # Returns true if the given piece can move to given move.
+  # PAWN NOTES
+  # Index = 0: Vertical movement
+  # Index = 1 or 2: Diagonal movement
+  def valid_pawn_move_curr_team?(chosen_piece, move, index)
+    diagonal_index = [1, 2]
+
+    return true if empty_space?(move) && index == 0
+
+    return true if opponent_team?(move) && diagonal_index.include?(index)
+
+    return true if en_passant_capturable?(chosen_piece, move) && diagonal_index.include?(index)
+
+    return false
+  end
+
+  # Helper function for #find_moves
+  # Finds valid moves if the chosen piece is for the opponent's team.
+  def find_moves_for_opp_team(chosen_piece)
+    valid_moves = []
+
+    chosen_piece.movement.each_with_index do |move_direction, index|
+      move_direction.each do |move|
+        if check_valid_move?(move)
+          break if opponent_team?(move)
+
+          # For pawns.
+          if chosen_piece.instance_of?(Pawn)
+            valid_moves.append(move) if valid_pawn_move_opp_team?(chosen_piece, move, index)
+          # For all other pieces.
+          else
+            valid_moves.append(move) if empty_space?(move)
+
+            if same_team?(move)
+              valid_moves.append(move)
+              break
+            end
+          end
+        end
+      end
+    end
+
+    valid_moves
+  end
+
+  # Helper function for #find_moves_for_opp_team
+  # Returns true if the given piece can move to given move.
+  # PAWN NOTES
+  # Index = 0: Vertical movement
+  # Index = 1 or 2: Diagonal movement
+  def valid_pawn_move_opp_team?(chosen_piece, move, index)
+    diagonal_index = [1, 2]
+
+    return true if empty_space?(move) && index == 0
+
+    return true if opponent_team?(move) && diagonal_index.include?(index)
+
+    return true if en_passant_capturable?(chosen_piece, move) && diagonal_index.include?(index)
+
+    return false
+  end
+
+  # Returns true if the chosen piece can go to given move via en passant.
+  # Returns false otherwise.
+  def en_passant_capturable?(chosen_piece, move)
+    left_file = (chosen_piece.file.ord - 1).chr
+    right_file = (chosen_piece.file.ord + 1).chr
+
+    piece_left_of = get_piece_at([left_file, chosen_piece.rank])
+    piece_right_of = get_piece_at([right_file, chosen_piece.rank])
+
+    return true if piece_left_of.instance_of?(Pawn) && 
+                   piece_left_of.en_passant_capturable == true && 
+                   move[0] == piece_left_of.file
+
+    return true if piece_right_of.instance_of?(Pawn) && 
+                   piece_right_of.en_passant_capturable == true && 
+                   move[0] == piece_right_of.file
+
+    return false
+  end
+
+  # Makes all of the opponent's pawns' en_passant_capturable variables equal to false.
+  # MUST BE RUN AT THE END OF EVERY TURN.
+  def reset_opponent_en_passant
+    @opponent_team = @opponent_team.each { |piece| piece.en_passant_capturable = false if piece.instance_of?(Pawn) }
   end
 end
