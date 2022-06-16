@@ -87,14 +87,6 @@ class Board
     piece.move_to(move[0], move[1])
   end
 
-  # Returns true if the move given currently has a piece from the opponent's team.
-  # Returns false otherwise.
-  def opponent_team?(move)
-    @opponent_team.each { |piece| return true if piece.position == move }
-
-    return false
-  end
-
   # Returns the piece object at a given position.
   # Returns nil if the position is empty.
   def get_piece_at(position)
@@ -305,6 +297,14 @@ class Board
   # Returns false otherwise.
   def same_team?(move)
     @curr_team.each { |piece| return true if piece.position == move }
+
+    return false
+  end
+
+  # Returns true if the move given currently has a piece from the opponent's team.
+  # Returns false otherwise.
+  def opponent_team?(move)
+    @opponent_team.each { |piece| return true if piece.position == move }
 
     return false
   end
