@@ -42,14 +42,14 @@ class Pawn
   end
 
   # Changes this pieces current position.
-  def move_to(file, rank)
+  def move_to(position)
     if @first_move == true && (rank == @rank + 2 || rank == @rank - 2)
       @en_passant_capturable = true
     end
 
-    @file = file
-    @rank = rank
-    @position = [file, rank]
+    @file = position[0]
+    @rank = position[1]
+    @position = [position[0], position[1]]
 
     @first_move = false
   end

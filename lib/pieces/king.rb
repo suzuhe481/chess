@@ -50,9 +50,9 @@ class King
   end
 
   # Changes this pieces current position.
-  def move_to(file, rank)
-    @file = file
-    @rank = rank
-    @position = [file, rank]
+  def move_to(position)
+    @file = position[0]
+    @rank = position[1]
+    @position = [position[0], position[1]]
   end
 end
