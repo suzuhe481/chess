@@ -70,8 +70,9 @@ class Board
   # Moves a given piece to the selected move from the movement_arr.
   def move_piece_to(piece, movement_arr, move_choice)
     move = movement_arr[move_choice - 1]
+    
 
-    if piece.instance_of?(Pawn) && en_passant_capturable?(piece,move)
+    if piece.instance_of?(Pawn) && en_passant_capturable?(piece, move)
       capture = if piece.token[0] == "W"
                   [move[0], move[1] - 1]
                 else
@@ -84,7 +85,7 @@ class Board
     end
 
     capture_piece_at(capture)
-    piece.move_to(move[0], move[1])
+    piece.move_to(move)
   end
 
   # Returns the piece object at a given position.
@@ -178,14 +179,14 @@ class Board
     p king_moves
 
     king_moves.each do |move|
-      curr_king.move_to(move[0], move[1])
+      curr_king.move_to(move)
       print_board
 
-      curr_king.move_to(original_position[0], original_position[1])
+      curr_king.move_to(original_position)
       return false unless in_check?
     end
 
-    curr_king.move_to(original_position[0], original_position[1])
+    curr_king.move_to(original_position)
     true
   end
 
