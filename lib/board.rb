@@ -87,6 +87,8 @@ class Board
   def capture_piece_at(position)
     piece_to_capture = get_piece_at(position)
 
+    return if piece_to_capture.nil?
+
     @curr_team_captures.append(piece_to_capture)
 
     @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
@@ -94,6 +96,8 @@ class Board
 
   # Promotes a given pawn to the given type for the current player.
   def promote_pawn_to(pawn, type)
+    return "Error. Can't promote piece." if pawn.rank != 8 && pawn.rank != 1
+
     pawn_pos = pawn.position
     pawn_owner = pawn.owner
     pawn_color = pawn.token[0]
