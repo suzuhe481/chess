@@ -168,25 +168,33 @@ class Board
     false
   end
 
+  # Returns true if a king placed at the given position would be in chekc.
+  # Returns false otherwise.
+  def in_check_at?(position)
+    @opponent_team.each do |piece|
+      moves = find_moves(piece)
+
+      moves.each do |move|
+        return true if move == position
+      end
+    end
+
+    return false
+  end
+
   # Returns true if the current team's king is in checkmate.
   # Returns false otherwise.
   def in_checkmate?
     curr_king = @curr_team.detect { |piece| piece.class.to_s == "King" }
-    original_position = curr_king.position
 
     king_moves = find_moves(curr_king)
     king_moves.unshift(curr_king.position)
     p king_moves
 
     king_moves.each do |move|
-      curr_king.move_to(move)
-      print_board
-
-      curr_king.move_to(original_position)
-      return false unless in_check?
+      return false unless in_check_at?(move)
     end
 
-    curr_king.move_to(original_position)
     true
   end
 
@@ -240,7 +248,6 @@ class Board
              return false
            end
 
-    
     # Stores an operator in a variable depending on if the left or right rook is picked.
     direction_operator = if rook.position[0] == "a"
                            :-
@@ -248,26 +255,12 @@ class Board
                            :+
                          end
 
-    king_original_position = king.position
-
-    # Moves to the left or right, depending on direction_operator.
+    # Checks if king is in check when moved 2 spaces left or right.
     2.times do
       next_move = [(king.position[0].ord).public_send(direction_operator, 1).chr, king.position[1]]
 
-
-      return false unless empty_space?(next_move)
-
-      king.move_to(next_move)
-
-      if in_check?
-        king.move_to(king_original_position)
-        king.first_move = true
-        return false
-      end
+      return false if !empty_space?(next_move) || in_check_at?(next_move)
     end
-
-    king.move_to(king_original_position)
-    king.first_move = true
 
     return true
   end
@@ -416,9 +409,9 @@ class Board
     if index == 8
       return true if can_castle_to?(chosen_piece, move)
     else
-      return true if empty_space?(move)
+      return true if empty_space?(move) && !in_check_at?(move)
 
-      return true if opponent_team?(move)
+      return true if opponent_team?(move) && !in_check_at?(move)
     end
 
     return false
