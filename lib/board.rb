@@ -70,8 +70,7 @@ class Board
   # Moves a given piece to the selected move from the movement_arr.
   def move_piece_to(piece, movement_arr, move_choice)
     move = movement_arr[move_choice - 1]
-
-    if piece.instance_of?(Pawn) && en_passant_capturable?(piece,move)
+    if piece.instance_of?(Pawn) && en_passant_capturable?(piece, move)
       capture = if piece.token[0] == "W"
                   [move[0], move[1] - 1]
                 else
@@ -79,12 +78,26 @@ class Board
                 end
 
       capture_piece_at(capture)
+    elsif piece.instance_of?(King) && can_castle_to?(piece, move)
+      rook = if (piece.position[0].ord - move[0].ord).positive?
+               get_piece_at(["a", piece.position[1]])
+             elsif (piece.position[0].ord - move[0].ord).negative?
+               get_piece_at(["h", piece.position[1]])
+             end
+
+      rook_move = if (piece.position[0].ord - move[0].ord).positive?
+                    ["d", piece.rank]
+                  elsif (piece.position[0].ord - move[0].ord).negative?
+                    ["f", piece.rank]
+                  end
+
+      rook.move_to(rook_move)
     else
       capture = move
     end
 
     capture_piece_at(capture)
-    piece.move_to(move[0], move[1])
+    piece.move_to(move)
   end
 
   # Returns the piece object at a given position.
@@ -167,25 +180,33 @@ class Board
     false
   end
 
+  # Returns true if a king placed at the given position would be in chekc.
+  # Returns false otherwise.
+  def in_check_at?(position)
+    @opponent_team.each do |piece|
+      moves = find_moves(piece)
+
+      moves.each do |move|
+        return true if move == position
+      end
+    end
+
+    return false
+  end
+
   # Returns true if the current team's king is in checkmate.
   # Returns false otherwise.
   def in_checkmate?
     curr_king = @curr_team.detect { |piece| piece.class.to_s == "King" }
-    original_position = curr_king.position
 
     king_moves = find_moves(curr_king)
     king_moves.unshift(curr_king.position)
     p king_moves
 
     king_moves.each do |move|
-      curr_king.move_to(move[0], move[1])
-      print_board
-
-      curr_king.move_to(original_position[0], original_position[1])
-      return false unless in_check?
+      return false unless in_check_at?(move)
     end
 
-    curr_king.move_to(original_position[0], original_position[1])
     true
   end
 
@@ -209,6 +230,57 @@ class Board
     board_arr = board_arr.map(&:reverse).transpose
 
     display_board(board_arr, empty_token)
+  end
+
+  # Returns true if the given king can castle to the given move.
+  # Returns false otherwise.
+  # CASTLE CONDITIONS
+  # King must not have moved.
+  # Chosen rook must not have moved.
+  # There must be empty space between the king and the chosen rook.
+  # The king must not be in check.
+  # The king must not travel through a check.
+  def can_castle_to?(king, move)
+    return false if king.first_move == false
+
+    return false if move.nil?
+
+    # Gets left or right, non-moved rook, depending on the move given.
+    rook = if (king.position[0].ord - move[0].ord).positive? &&
+              get_piece_at(["a", king.position[1]]).instance_of?(Rook) &&
+              get_piece_at(["a", king.position[1]]).first_move == true
+
+             get_piece_at(["a", king.position[1]])
+           elsif (king.position[0].ord - move[0].ord).negative? &&
+                 get_piece_at(["h", king.position[1]]).instance_of?(Rook) &&
+                 get_piece_at(["h", king.position[1]]).first_move == true
+             
+             get_piece_at(["h", king.position[1]])
+           else
+             return false
+           end
+
+    # Stores an operator in a variable depending on if the left or right rook is picked.
+    direction_operator = if rook.position[0] == "a"
+                           :-
+                         else
+                           :+
+                         end
+
+    # Checks if king is in check when moved 2 spaces left or right.
+    2.times do
+      next_move = [(king.position[0].ord).public_send(direction_operator, 1).chr, king.position[1]]
+
+      return false if !empty_space?(next_move) || in_check_at?(next_move)
+    end
+
+    return true
+  end
+
+  # Moves the given king to the given castle move.
+  # Moves the appropriate rook.
+  def castle_move(king, move)
+
   end
 
   private
@@ -322,6 +394,9 @@ class Board
           # For pawns.
           if chosen_piece.instance_of?(Pawn)
             valid_moves.append(move) if valid_pawn_move_curr_team?(chosen_piece, move, index)
+          # For kings.
+          elsif chosen_piece.instance_of?(King)
+            valid_moves.append(move) if valid_king_move_curr_team?(chosen_piece, move, index)
           # For all other pieces.
           else
             valid_moves.append(move) if empty_space?(move)
@@ -336,6 +411,22 @@ class Board
     end
 
     valid_moves
+  end
+
+  # Helper function for #find_moves_for_curr_team
+  # Checks if a king's move is valid.
+  # KING NOTES
+  # Index = 8: A Castle move
+  def valid_king_move_curr_team?(chosen_piece, move, index)
+    if index == 8
+      return true if can_castle_to?(chosen_piece, move)
+    else
+      return true if empty_space?(move) && !in_check_at?(move)
+
+      return true if opponent_team?(move) && !in_check_at?(move)
+    end
+
+    return false
   end
 
   # Helper function for #find_moves_for_curr_team
