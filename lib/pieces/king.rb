@@ -3,12 +3,13 @@
 # until the edge of the board.
 # Capture: Can capture an opponent's piece when landing on it.
 class King
-  attr_accessor :rank, :file, :position, :in_check, :owner, :token
+  attr_accessor :rank, :file, :position, :first_move, :in_check, :owner, :token
 
   def initialize(file, rank, owner, token)
     @file = file
     @rank = rank
     @position = [file, rank]
+    @first_move = true
     @in_check = false
     @owner = owner
     @token = token
@@ -26,6 +27,7 @@ class King
     moves_NE = []
     moves_SW = []
     moves_SE = []
+    moves_castle = []
 
     moves_up.append([(file.ord).chr, rank + 1])
     moves_down.append([(file.ord).chr, rank - 1])
@@ -37,6 +39,9 @@ class King
     moves_SW.append([(file.ord - 1).chr, rank - 1])
     moves_SE.append([(file.ord + 1).chr, rank - 1])
 
+    moves_castle.append([(file.ord - 2).chr, rank]) if first_move == true
+    moves_castle.append([(file.ord + 2).chr, rank]) if first_move == true
+
     all_moves.append(moves_up)
     all_moves.append(moves_down)
     all_moves.append(moves_left)
@@ -45,6 +50,7 @@ class King
     all_moves.append(moves_NE)
     all_moves.append(moves_SW)
     all_moves.append(moves_SE)
+    all_moves.append(moves_castle)
 
     all_moves
   end
@@ -54,5 +60,7 @@ class King
     @file = position[0]
     @rank = position[1]
     @position = [position[0], position[1]]
+
+    @first_move = false
   end
 end
