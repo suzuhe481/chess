@@ -70,8 +70,6 @@ class Board
   # Moves a given piece to the selected move from the movement_arr.
   def move_piece_to(piece, movement_arr, move_choice)
     move = movement_arr[move_choice - 1]
-    
-
     if piece.instance_of?(Pawn) && en_passant_capturable?(piece, move)
       capture = if piece.token[0] == "W"
                   [move[0], move[1] - 1]
@@ -80,6 +78,20 @@ class Board
                 end
 
       capture_piece_at(capture)
+    elsif piece.instance_of?(King) && can_castle_to?(piece, move)
+      rook = if (piece.position[0].ord - move[0].ord).positive?
+               get_piece_at(["a", piece.position[1]])
+             elsif (piece.position[0].ord - move[0].ord).negative?
+               get_piece_at(["h", piece.position[1]])
+             end
+
+      rook_move = if (piece.position[0].ord - move[0].ord).positive?
+                    ["d", piece.rank]
+                  elsif (piece.position[0].ord - move[0].ord).negative?
+                    ["f", piece.rank]
+                  end
+
+      rook.move_to(rook_move)
     else
       capture = move
     end
