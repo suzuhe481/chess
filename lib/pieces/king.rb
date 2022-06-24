@@ -3,7 +3,7 @@
 # until the edge of the board.
 # Capture: Can capture an opponent's piece when landing on it.
 class King
-  attr_accessor :rank, :file, :position, :first_move, :in_check, :owner, :token
+  attr_accessor :rank, :file, :position, :first_move, :in_check, :owner, :token, :selected
 
   def initialize(file, rank, owner, token)
     @file = file
@@ -13,6 +13,7 @@ class King
     @in_check = false
     @owner = owner
     @token = token
+    @selected = " "
   end
 
   # Returns a 2D array of every valid or invalid move from this piece's position.
@@ -62,5 +63,15 @@ class King
     @position = [position[0], position[1]]
 
     @first_move = false
+  end
+
+  # Selects a piece by making @selected an "*"
+  def select
+    @selected = "*"
+  end
+
+  # Deselects a piece by making @selected a single space.
+  def deselect
+    @selected = " "
   end
 end
