@@ -277,10 +277,22 @@ class Board
     return true
   end
 
-  # Moves the given king to the given castle move.
-  # Moves the appropriate rook.
-  def castle_move(king, move)
+  # Returns true is the user selection is valid.
+  # Valid is...
+  # A length of 2
+  # Location is not on the board or
+  # Location is empty or
+  # Location is an opponent's piece.
+  def validate_user_selection(user_selection)
+    return false if user_selection.length != 2
 
+    piece_location = [user_selection[0], user_selection[1].to_i]
+
+    return false if !check_valid_move?(piece_location) ||
+                    empty_space?(piece_location) ||
+                    opponent_team?(piece_location)
+                    
+    return true
   end
 
   private
@@ -410,6 +422,7 @@ class Board
       end
     end
 
+    valid_moves.append("back")
     valid_moves
   end
 
@@ -472,6 +485,7 @@ class Board
       end
     end
 
+    valid_moves.append("back")
     valid_moves
   end
 
