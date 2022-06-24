@@ -2,7 +2,7 @@
 # Pawn movement: Moves 1 square forward at a time. Can move 2 squares forward only on that piece's first turn.
 # Capture: Can capture an opponent's piece if it is 1 square away, diagonally, to the right or left.
 class Pawn
-  attr_accessor :rank, :file, :position, :first_move, :owner, :token, :en_passant_capturable, :selected
+  attr_accessor :rank, :file, :position, :first_move, :owner, :token, :en_passant_capturable
 
   def initialize(file, rank, owner, token)
     @file = file
@@ -12,7 +12,6 @@ class Pawn
     @owner = owner
     @token = token
     @en_passant_capturable = false
-    @selected = " "
   end
 
   # Returns a 2D array of every valid or invalid move from this piece's position.
@@ -53,15 +52,5 @@ class Pawn
     @position = position
 
     @first_move = false
-  end
-
-  # Selects a piece by making @selected an "*"
-  def select
-    @selected = "*"
-  end
-
-  # Deselects a piece by making @selected a single space.
-  def deselect
-    @selected = " "
   end
 end
