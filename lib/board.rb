@@ -68,7 +68,9 @@ class Board
   end
 
   # Moves a given piece to the selected move from the movement_arr.
-  def move_piece_to(piece, movement_arr, move_choice)
+  def move_piece_to(piece, move_choice)
+    movement_arr = find_moves(piece)
+
     move = movement_arr[move_choice - 1]
     if piece.instance_of?(Pawn) && en_passant_capturable?(piece, move)
       capture = if piece.token[0] == "W"
