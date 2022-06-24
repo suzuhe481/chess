@@ -329,7 +329,16 @@ class Board
     
     puts "    _______________________________________________________"
     board_arr.each do |row|
-      puts "   |      |      |      |      |      |      |      |      |"
+      
+      print "   |"
+      row.each do |piece|
+        if piece == empty_token
+          print "      |"
+        else
+          print "     #{piece.selected}|"
+        end
+      end
+      puts
 
       row_num = nums_enum.next
       print " #{row_num} "
@@ -347,9 +356,8 @@ class Board
       puts
     end
 
-    letters = ("a".."h")
     print "   "
-    letters.each do |letter|
+    ("a".."h").each do |letter|
       print "   "
       print letter
       print "   "
