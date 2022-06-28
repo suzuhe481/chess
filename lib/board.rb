@@ -264,6 +264,8 @@ class Board
 
     return false if move.nil?
 
+    return false if move[0] == "d" || move[0] == "f"
+
     # Gets left or right, non-moved rook, depending on the move given.
     rook = if (king.position[0].ord - move[0].ord).positive? &&
               get_piece_at(["a", king.position[1]]).instance_of?(Rook) &&
