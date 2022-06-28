@@ -132,6 +132,18 @@ class Board
     @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
   end
 
+  # Returns true if the current team's pawn is at the opposite end of the board.
+  # Returns false otherwise.
+  # Params
+  # piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  def can_promote?(piece)
+    return false unless piece.instance_of?(Pawn)
+
+    return true if piece.rank == 8 || piece.rank == 1
+
+    false
+  end
+
   # Promotes a given pawn to the given type for the current player.
   # Params
   # pawn: A pawn object.
@@ -146,16 +158,16 @@ class Board
     @curr_team = @curr_team.reject { |piece| piece == pawn }
 
     case type
-    when "Pa"
-      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
-    when "Ro"
+    when 1
       @curr_team.append(Rook.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Ro"))
-    when "Kn"
+    when 2
       @curr_team.append(Knight.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Kn"))
-    when "Bi"
+    when 3
       @curr_team.append(Bishop.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Bi"))
-    when "Qu"
+    when 4
       @curr_team.append(Queen.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Qu"))
+    when 5
+      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
     else
       puts "Invalid piece type"
     end
