@@ -19,18 +19,15 @@ class Knight
   # Each array in the 2D array is a separate direction.
   def movement
     all_moves = []
-    moves = []
 
-    moves.append( [(file.ord + 1).chr, rank + 2] )
-    moves.append( [(file.ord + 1).chr, rank - 2] )
-    moves.append( [(file.ord - 1).chr, rank - 2] )
-    moves.append( [(file.ord - 1).chr, rank + 2] )
-    moves.append( [(file.ord + 2).chr, rank + 1] )
-    moves.append( [(file.ord + 2).chr, rank - 1] )
-    moves.append( [(file.ord - 2).chr, rank - 1] )
-    moves.append( [(file.ord - 2).chr, rank + 1] )
-
-    all_moves.append(moves)
+    all_moves.append([ [(file.ord + 1).chr, rank + 2] ])
+    all_moves.append([ [(file.ord + 1).chr, rank - 2] ])
+    all_moves.append([ [(file.ord - 1).chr, rank - 2] ])
+    all_moves.append([ [(file.ord - 1).chr, rank + 2] ])
+    all_moves.append([ [(file.ord + 2).chr, rank + 1] ])
+    all_moves.append([ [(file.ord + 2).chr, rank - 1] ])
+    all_moves.append([ [(file.ord - 2).chr, rank - 1] ])
+    all_moves.append([ [(file.ord - 2).chr, rank + 1] ])
 
     all_moves
   end
