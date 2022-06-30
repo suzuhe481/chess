@@ -59,6 +59,8 @@ class Board
   end
 
   # Returns a sorted array of valid moves from a given piece's current position.
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
   def find_moves(chosen_piece)
     return nil if chosen_piece.nil?
 
@@ -68,7 +70,12 @@ class Board
   end
 
   # Moves a given piece to the selected move from the movement_arr.
-  def move_piece_to(piece, movement_arr, move_choice)
+  # Params
+  # piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  # move_choice: An integer.
+  def move_piece_to(piece, move_choice)
+    movement_arr = find_moves(piece)
+
     move = movement_arr[move_choice - 1]
     if piece.instance_of?(Pawn) && en_passant_capturable?(piece, move)
       capture = if piece.token[0] == "W"
@@ -102,6 +109,8 @@ class Board
 
   # Returns the piece object at a given position.
   # Returns nil if the position is empty.
+  # Params
+  # position: An array consiting of 2 elements, a single character from a-h, and a single integer from 1-8.
   def get_piece_at(position)
     @curr_team.each { |piece| return piece if piece.position == position }
 
@@ -111,6 +120,8 @@ class Board
   end
 
   # For the current team, captures the piece at the given position.
+  # Params
+  # position: An array consiting of 2 elements, a single character from a-h, and a single integer from 1-8.
   def capture_piece_at(position)
     piece_to_capture = get_piece_at(position)
 
@@ -121,7 +132,22 @@ class Board
     @opponent_team = @opponent_team.reject { |piece| piece == piece_to_capture }
   end
 
+  # Returns true if the current team's pawn is at the opposite end of the board.
+  # Returns false otherwise.
+  # Params
+  # piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  def can_promote?(piece)
+    return false unless piece.instance_of?(Pawn)
+
+    return true if piece.rank == 8 || piece.rank == 1
+
+    false
+  end
+
   # Promotes a given pawn to the given type for the current player.
+  # Params
+  # pawn: A pawn object.
+  # type: A string consister of 2 letters.
   def promote_pawn_to(pawn, type)
     return "Error. Can't promote piece." if pawn.rank != 8 && pawn.rank != 1
 
@@ -132,16 +158,16 @@ class Board
     @curr_team = @curr_team.reject { |piece| piece == pawn }
 
     case type
-    when "Pa"
-      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
-    when "Ro"
+    when 1
       @curr_team.append(Rook.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Ro"))
-    when "Kn"
+    when 2
       @curr_team.append(Knight.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Kn"))
-    when "Bi"
+    when 3
       @curr_team.append(Bishop.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Bi"))
-    when "Qu"
+    when 4
       @curr_team.append(Queen.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Qu"))
+    when 5
+      @curr_team.append(Pawn.new(pawn_pos[0], pawn_pos[1], pawn_owner, "#{pawn_color}_Pa"))
     else
       puts "Invalid piece type"
     end
@@ -182,6 +208,8 @@ class Board
 
   # Returns true if a king placed at the given position would be in chekc.
   # Returns false otherwise.
+  # Params
+  # position: An array consiting of 2 elements, a single character from a-h, and a single integer from 1-8.
   def in_check_at?(position)
     @opponent_team.each do |piece|
       moves = find_moves(piece)
@@ -201,13 +229,31 @@ class Board
 
     king_moves = find_moves(curr_king)
     king_moves.unshift(curr_king.position)
-    p king_moves
 
     king_moves.each do |move|
       return false unless in_check_at?(move)
     end
 
     true
+  end
+
+  # Returns true if the current player is in a stalemate.
+  # Returns false otherwise.
+  def in_stalemate?
+    return false if in_check?
+
+    king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+
+    king_moves = find_moves(king)
+
+    stalemate = false
+    king_moves.each do |move|
+      next if move == "back"
+
+      stalemate = true if in_check_at?(move)
+    end
+
+    stalemate
   end
 
   # Prints the current board.
@@ -240,10 +286,15 @@ class Board
   # There must be empty space between the king and the chosen rook.
   # The king must not be in check.
   # The king must not travel through a check.
+  # Params
+  # king: A king object.
+  # move: An array consiting of 2 elements, a single character from a-h, and a single integer from 1-8.
   def can_castle_to?(king, move)
     return false if king.first_move == false
 
     return false if move.nil?
+
+    return false if move[0] == "d" || move[0] == "f"
 
     # Gets left or right, non-moved rook, depending on the move given.
     rook = if (king.position[0].ord - move[0].ord).positive? &&
@@ -277,15 +328,31 @@ class Board
     return true
   end
 
-  # Moves the given king to the given castle move.
-  # Moves the appropriate rook.
-  def castle_move(king, move)
+  # Returns true is the user selection is valid.
+  # Valid is...
+  # A length of 2
+  # Location is not on the board or
+  # Location is empty or
+  # Location is an opponent's piece.
+  # Params
+  # user_selection: A string.
+  def validate_user_selection(user_selection)
+    return false if user_selection.length != 2
 
+    piece_location = [user_selection[0], user_selection[1].to_i]
+
+    return false if !check_valid_move?(piece_location) ||
+                    empty_space?(piece_location) ||
+                    opponent_team?(piece_location)
+                    
+    return true
   end
 
   private
 
   # Places current team pieces on board.
+  # Params
+  # board_arr: An 8x8 2d array.
   def populate_curr_team(board_arr)
     @curr_team.each do |piece|
       piece_file = piece.file.ord - 96
@@ -298,6 +365,8 @@ class Board
   end
 
   # Places opponent team pieces on board.
+  # Params
+  # board_arr: An 8x8 2d array.
   def populate_opponent_team(board_arr)
     @opponent_team.each do |piece|
       piece_file = piece.file.ord - 96
@@ -310,12 +379,43 @@ class Board
   end
 
   # Displays the board.
+  # Params
+  # board_arr: An 8x8 2d array.
+  # empty_token: A string consiting of 4 blank spaces.
   def display_board(board_arr, empty_token)
+    top_player_captures = if @curr_player == "Player 2"
+                            @curr_team_captures
+                          else
+                            @opponent_team_captures
+                          end
+
+    bottom_player_captures = if @curr_player == "Player 1"
+                               @curr_team_captures
+                             else
+                               @opponent_team_captures
+                             end
+
+    print "Player 2 Captures: "
+    top_player_captures.each do |capture|
+      print "#{capture.token} "
+    end
+    puts
+    
+
     nums_enum = (1..8).reverse_each
     
     puts "    _______________________________________________________"
     board_arr.each do |row|
-      puts "   |      |      |      |      |      |      |      |      |"
+      
+      print "   |"
+      row.each do |piece|
+        if piece == empty_token
+          print "      |"
+        else
+          print "     #{piece.selected}|"
+        end
+      end
+      puts
 
       row_num = nums_enum.next
       print " #{row_num} "
@@ -333,18 +433,25 @@ class Board
       puts
     end
 
-    letters = ("a".."h")
     print "   "
-    letters.each do |letter|
+    ("a".."h").each do |letter|
       print "   "
       print letter
       print "   "
     end
     puts
+    print "Player 1 Captures: "
+    bottom_player_captures.each do |capture|
+      print "#{capture.token} "
+    end
+    puts
+    puts
   end
 
   # Returns true if a given position is a valid move.
   # Returns false otherwise.
+  # Params
+  # move: An array consisting of 2 elements.
   def check_valid_move?(move)
     file_pos_reg_exp = /^[a-h]$/
     rank_pos_reg_exp = /^[1-8]$/
@@ -356,6 +463,8 @@ class Board
 
   # Returns true if a move given is currently empty.
   # Returns false otherwise.
+  # Params
+  # move: An array consisting of 2 elements.
   def empty_space?(move)
     empty = true
     
@@ -367,6 +476,8 @@ class Board
 
   # Returns true if the move given currently has a piece from the same team.
   # Returns false otherwise.
+  # Params
+  # move: An array consisting of 2 elements.
   def same_team?(move)
     @curr_team.each { |piece| return true if piece.position == move }
 
@@ -375,6 +486,8 @@ class Board
 
   # Returns true if the move given currently has a piece from the opponent's team.
   # Returns false otherwise.
+  # Params
+  # move: An array consisting of 2 elements.
   def opponent_team?(move)
     @opponent_team.each { |piece| return true if piece.position == move }
 
@@ -383,6 +496,8 @@ class Board
 
   # Helper function for #find_moves
   # Finds valid moves if the chosen piece is for the current team.
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
   def find_moves_for_curr_team(chosen_piece)
     valid_moves = []
 
@@ -410,6 +525,7 @@ class Board
       end
     end
 
+    valid_moves.append("back")
     valid_moves
   end
 
@@ -417,6 +533,10 @@ class Board
   # Checks if a king's move is valid.
   # KING NOTES
   # Index = 8: A Castle move
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  # move: An array consisting of 2 elements.
+  # index: An integer.
   def valid_king_move_curr_team?(chosen_piece, move, index)
     if index == 8
       return true if can_castle_to?(chosen_piece, move)
@@ -434,6 +554,10 @@ class Board
   # PAWN NOTES
   # Index = 0: Vertical movement
   # Index = 1 or 2: Diagonal movement
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  # move: An array consisting of 2 elements.
+  # index: An integer.
   def valid_pawn_move_curr_team?(chosen_piece, move, index)
     diagonal_index = [1, 2]
 
@@ -448,6 +572,8 @@ class Board
 
   # Helper function for #find_moves
   # Finds valid moves if the chosen piece is for the opponent's team.
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
   def find_moves_for_opp_team(chosen_piece)
     valid_moves = []
 
@@ -472,6 +598,7 @@ class Board
       end
     end
 
+    valid_moves.append("back")
     valid_moves
   end
 
@@ -480,6 +607,10 @@ class Board
   # PAWN NOTES
   # Index = 0: Vertical movement
   # Index = 1 or 2: Diagonal movement
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  # move: An array consisting of 2 elements.
+  # index: An integer.
   def valid_pawn_move_opp_team?(chosen_piece, move, index)
     diagonal_index = [1, 2]
 
@@ -494,6 +625,9 @@ class Board
 
   # Returns true if the chosen piece can go to given move via en passant.
   # Returns false otherwise.
+  # Params
+  # chosen_piece: An object of either pawn, rook, knight, bishop, queen, or king.
+  # move: An array consisting of 2 elements.
   def en_passant_capturable?(chosen_piece, move)
     left_file = (chosen_piece.file.ord - 1).chr
     right_file = (chosen_piece.file.ord + 1).chr
