@@ -193,7 +193,7 @@ class Board
   # Returns true if the current team's king is in check.
   # Returns false otherwise.
   def in_check?
-    king_position = @curr_team.detect { |piece| piece.class.to_s == "King" }.position
+    king_position = @curr_team.detect { |piece| piece.instance_of?(King) }.position
 
     @opponent_team.each do |piece|
       moves = find_moves(piece)
@@ -225,7 +225,7 @@ class Board
   # Returns true if the current team's king is in checkmate.
   # Returns false otherwise.
   def in_checkmate?
-    curr_king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+    curr_king = @curr_team.detect { |piece| piece.instance_of?(King) }
 
     king_moves = find_moves(curr_king)
     king_moves.unshift(curr_king.position)
@@ -242,7 +242,7 @@ class Board
   def in_stalemate?
     return false if in_check?
 
-    king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+    king = @curr_team.detect { |piece| piece.instance_of?(King) }
 
     king_moves = find_moves(king)
 
