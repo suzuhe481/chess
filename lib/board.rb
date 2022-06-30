@@ -383,6 +383,25 @@ class Board
   # board_arr: An 8x8 2d array.
   # empty_token: A string consiting of 4 blank spaces.
   def display_board(board_arr, empty_token)
+    top_player_captures = if @curr_player == "Player 2"
+                            @curr_team_captures
+                          else
+                            @opponent_team_captures
+                          end
+
+    bottom_player_captures = if @curr_player == "Player 1"
+                               @curr_team_captures
+                             else
+                               @opponent_team_captures
+                             end
+
+    print "Player 2 Captures: "
+    top_player_captures.each do |capture|
+      print "#{capture.token} "
+    end
+    puts
+    
+
     nums_enum = (1..8).reverse_each
     
     puts "    _______________________________________________________"
@@ -420,6 +439,12 @@ class Board
       print letter
       print "   "
     end
+    puts
+    print "Player 1 Captures: "
+    bottom_player_captures.each do |capture|
+      print "#{capture.token} "
+    end
+    puts
     puts
   end
 
