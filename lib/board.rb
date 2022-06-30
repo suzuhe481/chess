@@ -229,13 +229,31 @@ class Board
 
     king_moves = find_moves(curr_king)
     king_moves.unshift(curr_king.position)
-    p king_moves
 
     king_moves.each do |move|
       return false unless in_check_at?(move)
     end
 
     true
+  end
+
+  # Returns true if the current player is in a stalemate.
+  # Returns false otherwise.
+  def in_stalemate?
+    return false if in_check?
+
+    king = @curr_team.detect { |piece| piece.class.to_s == "King" }
+
+    king_moves = find_moves(king)
+
+    stalemate = false
+    king_moves.each do |move|
+      next if move == "back"
+
+      stalemate = true if in_check_at?(move)
+    end
+
+    stalemate
   end
 
   # Prints the current board.
