@@ -30,3 +30,6 @@ This is a chess game that is ran through the command line. Two human players tak
   - When your opponent is not in check, but cannot make a move without putting themselves in check. The game is a draw.
   
 For more detailed instructions, visit [chessvariants.org/d.chess/chess.html](chessvariants.org/d.chess/chess.html)
+
+### Bugs
+- When put in check, you must move your king. Player should be able to move any piece as long as it gets them out of check.
